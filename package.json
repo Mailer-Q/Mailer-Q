@@ -9,7 +9,6 @@
   "author": "Arun Sood",
   "license": "MIT",
   "dependencies": {
-    "ejs": "^2.5.6",
     "kue": "^0.11.6",
     "nodemailer": "^4.0.1"
   }
