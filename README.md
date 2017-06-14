@@ -33,6 +33,7 @@ module.exports = MailerQ;
 - **auth** (Optional): User and pass for authentication
 - **htmlBody** (Optional): HTML to send in email message
 - **renderer** (Optional): Method to render email templates
+- **redis** (Optional): Redis connection settings (more on this below)
 
 Example:
 
@@ -86,4 +87,22 @@ MailerQ
 - **to** (Optional): Email address of recipient
 - **subject**: Subject of message
 - **templateFileName** (Optional): Name of file used as template (only use this is you're using a renderer plugin)
-- **locals** (Optional): Object of local variables to be used in renderer 
+- **locals** (Optional): Object of local variables to be used in renderer
+
+#### Redis Connection Settings
+
+- If you need to connect to Redis in a custom way, you can set an object in the configuration options like so:
+
+```javascript
+const config = {
+	redis: {
+		port: 1234,
+		host: "10.0.5.1",
+		auth: "password",
+		db: 3 //If provided, select a non-default Redis db,
+		options: {
+			//See https://github.com/mranney/node_redis#rediscreateclient
+		}
+	}
+}
+```
