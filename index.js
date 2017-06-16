@@ -53,6 +53,8 @@ const MailerQ = (config) => {
         return new Promise((resolve, reject) => {
             queue
             .create("SendEmail", mod.messagePayload)
+            .attempts(5)
+            .backoff(true)
             .save((err) => {
                 if (err) {
                     return reject(err);
@@ -62,8 +64,6 @@ const MailerQ = (config) => {
             });
 
             queue.process("SendEmail", (job, done) => {
-                job.attempts(5).backoff(true);
-
                 transporter.sendMail(job.data, (err) => {
                     if (err) {
                         return done(err);
