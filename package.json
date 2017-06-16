@@ -1,6 +1,6 @@
 {
     "name": "mailer-q",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "repository": {
         "type": "git",
         "url": "https://github.com/arsood/mailer-q"
@@ -11,7 +11,7 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Arun Sood",
-    "license": "MIT",
+    "license": "ISC",
     "dependencies": {
         "kue": "^0.11.6",
         "nodemailer": "^4.0.1"
