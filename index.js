@@ -51,6 +51,8 @@ const MailerQ = (config) => {
         const queue = kue.createQueue(redisConfig);
 
         return new Promise((resolve, reject) => {
+            mod.messagePayload.title = "MailerQ SendEmail Process";
+
             queue
             .create("SendEmail", mod.messagePayload)
             .attempts(5)
