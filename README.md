@@ -106,3 +106,11 @@ const config = {
 	}
 }
 ```
+
+- You can also configure Redis using a connection string:
+
+```javascript
+const config = {
+	redis: "redis://example.com:1234?redis_option=value&redis_option=value"
+}
+```
