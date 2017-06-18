@@ -53,7 +53,8 @@ const config = {
 
 #### Optional Renderers
 
-- [EJS Renderer](https://github.com/arsood/mailer-q-ejs): Use the popular [EJS templating syntax](http://www.embeddedjs.com/).
+- [EJS Renderer](https://github.com/arsood/mailer-q-ejs): Use the [EJS templating syntax](http://www.embeddedjs.com/).
+- [Handlebars Renderer](https://github.com/arsood/mailer-q-handlebars): Use the [Handlebars templating syntax](http://handlebarsjs.com/).
 
 #### Sending Mail
 
