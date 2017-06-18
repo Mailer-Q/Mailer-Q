@@ -1,9 +1,9 @@
 {
     "name": "mailer-q",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "repository": {
         "type": "git",
-        "url": "https://github.com/arsood/mailer-q"
+        "url": "https://github.com/mailer-q/mailer-q"
     },
     "description": "A redis-backed mailer queue system",
     "main": "index.js",
