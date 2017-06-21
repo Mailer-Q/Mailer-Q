@@ -55,6 +55,7 @@ const MailerQ = (config) => {
 
             queue
             .create("SendEmail", mod.messagePayload)
+            .removeOnComplete(true)
             .attempts(5)
             .backoff(true)
             .save((err) => {
