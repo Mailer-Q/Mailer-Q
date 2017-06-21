@@ -31,7 +31,6 @@ module.exports = MailerQ;
 - **host**: Sending host
 - **port**: Port from which to send email
 - **auth** (Optional): User and pass for authentication
-- **htmlBody** (Optional): HTML to send in email message
 - **renderer** (Optional): Method to render email templates
 - **redis** (Optional): Redis connection settings (more on this below)
 
@@ -46,8 +45,7 @@ const config = {
     auth: {
         user: "your username",
         pass: "your pass"
-    },
-	htmlBody: "<h1>Hello World!</h1>"
+    }
 }
 ```
 
@@ -72,7 +70,8 @@ MailerQ
 .contents({
 	from: "Test Sender sender@test.com",
 	to: "recipient@example.com",
-	subject: "Test message"
+	subject: "Test message",
+	htmlBody: "<h1>HTML message here!</h1>"
 })
 .deliverNow()
 .then(() => {
@@ -89,6 +88,7 @@ MailerQ
 - **to** (Optional): Email address of recipient
 - **subject**: Subject of message
 - **templateFileName** (Optional): Name of file used as template (only use this is you're using a renderer plugin)
+- **htmlBody** (Optional): HTML to send in email message
 - **locals** (Optional): Object of local variables to be used in renderer
 
 #### Redis Connection Settings
