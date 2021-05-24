@@ -52,6 +52,10 @@ const MailerQ = () => {
     const queue = new Queue("MailerQ SendEmail Process", redisConfig);
     const transporter = nodemailer.createTransport(config.nodemailerConfig);
 
+    queue.add(mod.messagePayload, {
+      attempts: config.sendAttempts || 3,
+    });
+
     return new Promise((resolve, reject) => {
       return queue.process((job) => {
         return transporter.sendMail(job.data, (err) => {
