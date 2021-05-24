@@ -1,18 +1,15 @@
 const nodemailer = require("nodemailer");
 const Queue = require("bull");
 
-const MailerQ = (config) => {
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure || false,
-    auth: {
-      user: config.auth.user,
-      pass: config.auth.pass,
-    },
-  });
-
+const MailerQ = () => {
   let mod = {};
+  let config = {};
+
+  mod.config = (configOptions) => {
+    config = configOptions;
+
+    return mod;
+  };
 
   mod.contents = (message) => {
     const messagePayload = {
@@ -30,6 +27,8 @@ const MailerQ = (config) => {
   };
 
   mod.deliverNow = () => {
+    const transporter = nodemailer.createTransport(config.nodemailerConfig);
+
     return new Promise((resolve, reject) => {
       transporter.sendMail(mod.messagePayload, (err) => {
         if (err) {
@@ -51,6 +50,8 @@ const MailerQ = (config) => {
     }
 
     const queue = new Queue("MailerQ SendEmail Process", redisConfig);
+
+    const transporter = nodemailer.createTransport(config.nodemailerConfig);
 
     return new Promise((resolve, reject) => {
       queue.process((job, done) => {
