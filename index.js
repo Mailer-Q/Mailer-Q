@@ -1,84 +1,75 @@
 const nodemailer = require("nodemailer");
-const kue = require("kue");
+const Queue = require("bull");
 
 const MailerQ = (config) => {
-    const transporter = nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure || false,
-        auth: {
-            user: config.auth.user,
-            pass: config.auth.pass
-        }
-    });
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure || false,
+    auth: {
+      user: config.auth.user,
+      pass: config.auth.pass,
+    },
+  });
 
-    let mod = {};
+  let mod = {};
 
-    mod.contents = (message) => {
-        const messagePayload = {
-            from: message.from || config.defaultFrom,
-            to: message.to || config.defaultTo,
-            subject: message.subject,
-            html: config.renderer ? config.renderer(message.templateFileName, message.locals) : message.htmlBody
-        };
+  mod.contents = (message) => {
+    const messagePayload = {
+      from: message.from || config.defaultFrom,
+      to: message.to || config.defaultTo,
+      subject: message.subject,
+      html: config.renderer
+        ? config.renderer(message.templateFileName, message.locals)
+        : message.htmlBody,
+    };
 
-        mod.messagePayload = messagePayload;
-
-        return mod;
-    }
-
-    mod.deliverNow = () => {
-        return new Promise((resolve, reject) => {
-            transporter.sendMail(mod.messagePayload, (err) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                resolve();
-            });
-        });
-    }
-
-    mod.deliverLater = () => {
-        let redisConfig;
-
-        if (config.redis) {
-            redisConfig = {
-                redis: config.redis
-            }
-        }
-
-        const queue = kue.createQueue(redisConfig);
-
-        return new Promise((resolve, reject) => {
-            mod.messagePayload.title = "MailerQ SendEmail Process";
-
-            queue
-            .create("SendEmail", mod.messagePayload)
-            .removeOnComplete(true)
-            .attempts(5)
-            .backoff(true)
-            .save((err) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                resolve();
-            });
-
-            queue.process("SendEmail", (job, done) => {
-                transporter.sendMail(job.data, (err) => {
-                    if (err) {
-                        return done(err);
-                    }
-
-                    done();
-                });
-            });
-        });
-    }
+    mod.messagePayload = messagePayload;
 
     return mod;
-}
+  };
+
+  mod.deliverNow = () => {
+    return new Promise((resolve, reject) => {
+      transporter.sendMail(mod.messagePayload, (err) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      });
+    });
+  };
+
+  mod.deliverLater = () => {
+    let redisConfig;
+
+    if (config.redis) {
+      redisConfig = {
+        redis: config.redis,
+      };
+    }
+
+    const queue = new Queue("MailerQ SendEmail Process", redisConfig);
+
+    return new Promise((resolve, reject) => {
+      queue.process((job, done) => {
+        transporter.sendMail(job.data, (err) => {
+          if (err) {
+            done(err);
+
+            return reject(err);
+          }
+
+          done();
+
+          return resolve();
+        });
+      });
+    });
+  };
+
+  return mod;
+};
 
 module.exports = MailerQ;
