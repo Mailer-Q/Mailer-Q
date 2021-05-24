@@ -35,7 +35,7 @@ const MailerQ = () => {
           return reject(err);
         }
 
-        resolve();
+        return resolve();
       });
     });
   };
