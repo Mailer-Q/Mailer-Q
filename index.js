@@ -50,19 +50,14 @@ const MailerQ = () => {
     }
 
     const queue = new Queue("MailerQ SendEmail Process", redisConfig);
-
     const transporter = nodemailer.createTransport(config.nodemailerConfig);
 
     return new Promise((resolve, reject) => {
-      queue.process((job, done) => {
-        transporter.sendMail(job.data, (err) => {
+      return queue.process((job) => {
+        return transporter.sendMail(job.data, (err) => {
           if (err) {
-            done(err);
-
             return reject(err);
           }
-
-          done();
 
           return resolve();
         });
