@@ -1,19 +1,23 @@
 {
-    "name": "mailer-q",
-    "version": "1.1.0",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mailer-q/mailer-q"
-    },
-    "description": "A redis-backed mailer queue system",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Arun Sood",
-    "license": "ISC",
-    "dependencies": {
-        "kue": "^0.11.6",
-        "nodemailer": "^4.0.1"
-    }
+  "name": "mailer-q",
+  "version": "2.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mailer-q/mailer-q"
+  },
+  "description": "A redis-backed mailer queue system",
+  "main": "index.js",
+  "author": "Arun Sood",
+  "license": "ISC",
+  "dependencies": {
+    "bull": "^3.22.6",
+    "nodemailer": "^6.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.2",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0"
+  }
 }
