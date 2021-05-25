@@ -91,3 +91,4 @@ MailerQ.contents({
 - **templateFileName** (Optional): Name of file used as template (only use this if you're using a renderer plugin)
 - **htmlBody** (Optional): HTML to send in email message
 - **locals** (Optional): Object of local variables to be used in renderer (only use this if you're using a renderer plugin)
+- **attachments** (Optional): Array of attachment objects as specified by Nodemailer: https://nodemailer.com/message/attachments/.
