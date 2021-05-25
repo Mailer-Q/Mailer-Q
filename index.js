@@ -19,6 +19,7 @@ const MailerQ = () => {
       html: config.renderer
         ? config.renderer(message.templateFileName, message.locals)
         : message.htmlBody,
+      attachments: message.attachments,
     };
 
     mod.messagePayload = messagePayload;
