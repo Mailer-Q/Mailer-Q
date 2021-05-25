@@ -53,7 +53,7 @@ const config = {
 
 #### Optional Renderers
 
-- [EJS Renderer](https://github.com/mailer-q/mailer-q-ejs): Use the [EJS templating syntax](http://www.embeddedjs.com/).
+- [EJS Renderer](https://github.com/mailer-q/mailer-q-ejs): Use the [EJS templating syntax](https://ejs.co/).
 - [Handlebars Renderer](https://github.com/mailer-q/mailer-q-handlebars): Use the [Handlebars templating syntax](http://handlebarsjs.com/).
 - [Pug Renderer](https://github.com/mailer-q/mailer-q-pug): Use the [Pug templating syntax](https://pugjs.org/api/getting-started.html).
 
