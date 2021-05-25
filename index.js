@@ -27,7 +27,7 @@ const MailerQ = () => {
   };
 
   mod.deliverNow = () => {
-    const transporter = nodemailer.createTransport(config.nodemailerConfig);
+    const transporter = nodemailer.createTransport(config.nodemailer);
 
     return new Promise((resolve, reject) => {
       transporter.sendMail(mod.messagePayload, (err) => {
@@ -50,7 +50,7 @@ const MailerQ = () => {
     }
 
     const queue = new Queue("MailerQ SendEmail Process", redisConfig);
-    const transporter = nodemailer.createTransport(config.nodemailerConfig);
+    const transporter = nodemailer.createTransport(config.nodemailer);
 
     queue.add(mod.messagePayload, {
       attempts: config.sendAttempts || 3,

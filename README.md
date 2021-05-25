@@ -5,7 +5,7 @@ MailerQ is a Redis-backed mailer queue system.
 ## Installation
 
 ```bash
-npm install mailer-q
+npm install mailer-q --save
 ```
 
 ## Usage
@@ -15,38 +15,40 @@ npm install mailer-q
 config/mailers.js
 
 ```javascript
-const config = {
-	//Options here
-}
+const MailerQ = require("mailer-q")();
 
-const MailerQ = require("mailer-q")(config);
+const options = {
+  //Options here
+};
 
-module.exports = MailerQ;
+module.exports = MailerQ.config(options);
 ```
 
 #### Available Options for MailerQ Configuration
 
+- **nodemailer**: Configuration object for Nodemailer. An example is shown below but all options can be found in the Nodemailer documentation here: https://nodemailer.com/smtp/.
 - **defaultFrom** (Optional): Set the default sender
 - **defaultTo** (Optional): Set the default recipient (not common)
-- **host**: Sending host
-- **port**: Port from which to send email
-- **auth** (Optional): User and pass for authentication
 - **renderer** (Optional): Method to render email templates
-- **redis** (Optional): Redis connection settings (more on this below)
+- **sendAttempts** (Optional): Number of times MailerQ will attempt to send your mail. Defaults to 3.
+- **redis** (Optional): Configuration options to configure Redis. These configuration options come from ioredis and you can find all options in their documentation here: https://github.com/luin/ioredis/blob/master/API.md.
 
 Example:
 
 ```javascript
 const config = {
-    defaultFrom: "Test Tester test@example.com",
-    defaultTo: "recipient@test.com",
+  nodemailer: {
     host: "smtp.example.com",
     port: 587,
     auth: {
-        user: "your username",
-        pass: "your pass"
+      user: "your username",
+      pass: "your pass"
     }
-}
+  },
+  defaultFrom: "Test Tester test@example.com",
+  defaultTo: "recipient@test.com",
+  sendAttempts: 5
+};
 ```
 
 #### Optional Renderers
@@ -66,53 +68,26 @@ Example:
 ```javascript
 const MailerQ = require("./config/mailers");
 
-MailerQ
-.contents({
-	from: "Test Sender sender@test.com",
-	to: "recipient@example.com",
-	subject: "Test message",
-	htmlBody: "<h1>HTML message here!</h1>"
+MailerQ.contents({
+  from: "Test Sender sender@test.com",
+  to: "recipient@example.com",
+  subject: "Test message",
+  htmlBody: "<h1>HTML message here!</h1>"
 })
-.deliverNow()
-.then(() => {
-	console.log("Message sent!");
-})
-.catch((err) => {
-	console.log(err);
-});
+  .deliverNow()
+  .then(() => {
+    console.log("Message sent!");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 ```
 
 #### Available Options for `.contents()`
 
-- **from** (Optional): Email address of sender
-- **to** (Optional): Email address of recipient
 - **subject**: Subject of message
-- **templateFileName** (Optional): Name of file used as template (only use this is you're using a renderer plugin)
+- **from** (Optional): Email address of sender. Optional only if not using defaultFrom in the initial configuration.
+- **to** (Optional): Email address of recipient. Optional only if not using defaultTo in the initial configuration.
+- **templateFileName** (Optional): Name of file used as template (only use this if you're using a renderer plugin)
 - **htmlBody** (Optional): HTML to send in email message
-- **locals** (Optional): Object of local variables to be used in renderer
-
-#### Redis Connection Settings
-
-- If you need to connect to Redis in a custom way, you can set an object in the configuration options like so:
-
-```javascript
-const config = {
-	redis: {
-		port: 1234,
-		host: "10.0.5.1",
-		auth: "password",
-		db: 3 //If provided, select a non-default Redis db,
-		options: {
-			//See https://github.com/mranney/node_redis#rediscreateclient
-		}
-	}
-}
-```
-
-- You can also configure Redis using a connection string:
-
-```javascript
-const config = {
-	redis: "redis://example.com:1234?redis_option=value&redis_option=value"
-}
-```
+- **locals** (Optional): Object of local variables to be used in renderer (only use this if you're using a renderer plugin)
