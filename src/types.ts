@@ -1,4 +1,5 @@
 import Mail from "nodemailer/lib/mailer";
+import type { RedisOptions } from "ioredis";
 
 export type MailerQMod = {
   contents: (message: MailerQMessage) => MailerQMod;
@@ -13,7 +14,7 @@ export type MailerQConfig = {
   defaultTo?: string;
   renderer?: MailerQRenderer;
   sendAttempts?: number;
-  redis?: any;
+  redis?: RedisOptions;
   queueName?: string;
 };
 
