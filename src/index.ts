@@ -1,25 +1,19 @@
 import nodemailer from "nodemailer";
 import Queue from "bull";
-import { MailerQConfig, MailerQMod } from "./types";
+import { MailerQConfig, MailerQMessage, MailerQMod } from "./types";
 
-const MailerQ = () => {
+const MailerQ = (config: MailerQConfig) => {
   let mod = <MailerQMod>{};
-  let config = <MailerQConfig>{};
 
-  mod.config = (configOptions) => {
-    config = configOptions;
-
-    return mod;
-  };
-
-  mod.contents = (message) => {
+  mod.contents = (message: MailerQMessage) => {
     const messagePayload = {
       from: message.from || config.defaultFrom,
       to: message.to || config.defaultTo,
       subject: message.subject,
-      html: config.renderer
-        ? config.renderer(message.templateFileName, message.locals)
-        : message.htmlBody,
+      html:
+        config.renderer && message.templateFileName
+          ? config.renderer(message.templateFileName, message.locals)
+          : message.htmlBody,
       attachments: message.attachments,
     };
 
@@ -74,4 +68,4 @@ const MailerQ = () => {
   return mod;
 };
 
-module.exports = MailerQ;
+export default MailerQ;
