@@ -1,11 +1,10 @@
 import Mail from "nodemailer/lib/mailer";
 
 export type MailerQMod = {
-  config: any;
-  contents: any;
-  deliverNow: any;
-  deliverLater: any;
-  messagePayload: any;
+  contents: (message: MailerQMessage) => MailerQMod;
+  deliverNow: () => Promise<boolean>;
+  deliverLater: () => Promise<boolean>;
+  messagePayload: MailerQMessage;
 };
 
 export type MailerQConfig = {
@@ -14,6 +13,7 @@ export type MailerQConfig = {
   defaultTo?: string;
   renderer?: MailerQRenderer;
   sendAttempts?: number;
+  redis?: any;
 };
 
 export type MailerQRenderer = (

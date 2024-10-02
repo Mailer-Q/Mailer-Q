@@ -6,7 +6,7 @@ const MailerQ = (config: MailerQConfig) => {
   let mod = <MailerQMod>{};
 
   mod.contents = (message: MailerQMessage) => {
-    const messagePayload = {
+    const messagePayload = <MailerQMessage>{
       from: message.from || config.defaultFrom,
       to: message.to || config.defaultTo,
       subject: message.subject,
@@ -31,7 +31,7 @@ const MailerQ = (config: MailerQConfig) => {
           return reject(err);
         }
 
-        return resolve();
+        return resolve(true);
       });
     });
   };
@@ -45,7 +45,7 @@ const MailerQ = (config: MailerQConfig) => {
       };
     }
 
-    const queue = new Queue("MailerQ SendEmail Process", redisConfig);
+    const queue = new Queue("MailerQ: SendEmail Process", redisConfig);
     const transporter = nodemailer.createTransport(config.nodemailer);
 
     queue.add(mod.messagePayload, {
@@ -59,7 +59,7 @@ const MailerQ = (config: MailerQConfig) => {
             return reject(err);
           }
 
-          return resolve();
+          return resolve(true);
         });
       });
     });
