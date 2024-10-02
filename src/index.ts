@@ -1,9 +1,10 @@
-const nodemailer = require("nodemailer");
-const Queue = require("bull");
+import nodemailer from "nodemailer";
+import Queue from "bull";
+import { MailerQConfig, MailerQMod } from "./types";
 
 const MailerQ = () => {
-  let mod = {};
-  let config = {};
+  let mod = <MailerQMod>{};
+  let config = <MailerQConfig>{};
 
   mod.config = (configOptions) => {
     config = configOptions;
