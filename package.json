@@ -8,16 +8,9 @@
   "description": "A redis-backed mailer queue system",
   "main": "index.js",
   "author": "Arun Sood",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "bull": "^3.22.6",
-    "nodemailer": "^6.6.1"
-  },
-  "devDependencies": {
-    "eslint": "^7.26.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.23.2",
-    "eslint-plugin-prettier": "^3.4.0",
-    "prettier": "^2.3.0"
+    "bull": "^4.16.3",
+    "nodemailer": "^6.9.15"
   }
 }
