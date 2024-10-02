@@ -4,24 +4,32 @@ MailerQ is a Redis-backed mailer queue system.
 
 ## Installation
 
+NPM
+
 ```bash
 npm install mailer-q --save
+```
+
+Yarn
+
+```bash
+yarn add mailer-q
 ```
 
 ## Usage
 
 - It is easiest to have MailerQ's configuration in another module:
 
-config/mailers.js
+config/mailers.ts
 
-```javascript
-const MailerQ = require("mailer-q")();
+```typescript
+import MailerQ from "mailer-q";
 
-const options = {
-  //Options here
-};
+const mailerQ = MailerQ({
+  // Options here
+});
 
-module.exports = MailerQ.config(options);
+export default mailerQ;
 ```
 
 #### Available Options for MailerQ Configuration
@@ -35,19 +43,19 @@ module.exports = MailerQ.config(options);
 
 Example:
 
-```javascript
+```typescript
 const config = {
   nodemailer: {
     host: "smtp.example.com",
     port: 587,
     auth: {
       user: "your username",
-      pass: "your pass"
-    }
+      pass: "your pass",
+    },
   },
   defaultFrom: "Test Tester test@example.com",
   defaultTo: "recipient@test.com",
-  sendAttempts: 5
+  sendAttempts: 5,
 };
 ```
 
@@ -65,22 +73,23 @@ const config = {
 
 Example:
 
-```javascript
-const MailerQ = require("./config/mailers");
+```typescript
+import mailerQ from "./config/mailers";
 
-MailerQ.contents({
-  from: "Test Sender sender@test.com",
-  to: "recipient@example.com",
-  subject: "Test message",
-  htmlBody: "<h1>HTML message here!</h1>"
-})
-  .deliverNow()
-  .then(() => {
-    console.log("Message sent!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+try {
+  await mailerQ
+    .contents({
+      from: "Test Sender sender@test.com",
+      to: "recipient@example.com",
+      subject: "Test message",
+      htmlBody: "<h1>HTML message here!</h1>",
+    })
+    .deliverNow();
+
+  console.log("Message sent!");
+} catch (err) {
+  console.log(err);
+}
 ```
 
 #### Available Options for `.contents()`
