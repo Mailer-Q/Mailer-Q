@@ -14,6 +14,7 @@ export type MailerQConfig = {
   renderer?: MailerQRenderer;
   sendAttempts?: number;
   redis?: any;
+  queueName?: string;
 };
 
 export type MailerQRenderer = (
@@ -26,7 +27,7 @@ export type MailerQMessage = {
   from?: string;
   to?: string;
   templateFileName?: string;
-  locals?: any;
+  locals?: { [key: string]: any };
   htmlBody?: string;
   attachments?: Mail.Attachment[];
 };

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import Queue from "bull";
 import { MailerQConfig, MailerQMessage, MailerQMod } from "./types";
+import { DEFAULT_QUEUE_NAME, DEFAULT_SEND_ATTEMPTS } from "./constants";
 
 const MailerQ = (config: MailerQConfig) => {
   let mod = <MailerQMod>{};
@@ -11,7 +12,7 @@ const MailerQ = (config: MailerQConfig) => {
       to: message.to || config.defaultTo,
       subject: message.subject,
       html:
-        config.renderer && message.templateFileName
+        config.renderer && message.templateFileName && message.locals
           ? config.renderer(message.templateFileName, message.locals)
           : message.htmlBody,
       attachments: message.attachments,
@@ -45,11 +46,15 @@ const MailerQ = (config: MailerQConfig) => {
       };
     }
 
-    const queue = new Queue("MailerQ: SendEmail Process", redisConfig);
+    const queue = new Queue(
+      config.queueName || DEFAULT_QUEUE_NAME,
+      redisConfig
+    );
+
     const transporter = nodemailer.createTransport(config.nodemailer);
 
     queue.add(mod.messagePayload, {
-      attempts: config.sendAttempts || 3,
+      attempts: config.sendAttempts || DEFAULT_SEND_ATTEMPTS,
     });
 
     return new Promise((resolve, reject) => {
