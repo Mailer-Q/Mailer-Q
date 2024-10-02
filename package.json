@@ -7,11 +7,15 @@
   },
   "description": "A redis-backed mailer queue system",
   "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
   "author": "Arun Sood",
   "license": "MIT",
   "dependencies": {
     "bull": "^4.16.3",
-    "nodemailer": "^6.9.15"
+    "nodemailer": "^6.9.15",
+    "typescript": "^5.6.2"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.16"
