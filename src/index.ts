@@ -38,18 +38,15 @@ const MailerQ = (config: MailerQConfig) => {
   };
 
   mod.deliverLater = () => {
-    let redisConfig;
-
-    if (config.redis) {
-      redisConfig = {
-        redis: config.redis,
-      };
+    if (!config.redis) {
+      throw new Error(
+        "MailerQ: The deliverLater method requires Redis. No Redis config found."
+      );
     }
 
-    const queue = new Queue(
-      config.queueName || DEFAULT_QUEUE_NAME,
-      redisConfig
-    );
+    const queue = new Queue(config.queueName || DEFAULT_QUEUE_NAME, {
+      redis: config.redis,
+    });
 
     const transporter = nodemailer.createTransport(config.nodemailer);
 
