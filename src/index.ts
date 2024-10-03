@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import Queue from "bull";
+import Mail from "nodemailer/lib/mailer";
+
 import { MailerQConfig, MailerQMessage, MailerQMod } from "./types";
 import { DEFAULT_QUEUE_NAME, DEFAULT_SEND_ATTEMPTS } from "./constants";
 
@@ -7,7 +9,7 @@ const MailerQ = (config: MailerQConfig) => {
   let mod = <MailerQMod>{};
 
   mod.contents = (message: MailerQMessage) => {
-    const messagePayload = <MailerQMessage>{
+    const messagePayload = <Mail.Options>{
       from: message.from || config.defaultFrom,
       to: message.to || config.defaultTo,
       subject: message.subject,

@@ -5,7 +5,7 @@ export type MailerQMod = {
   contents: (message: MailerQMessage) => MailerQMod;
   deliverNow: () => Promise<boolean>;
   deliverLater: () => Promise<boolean>;
-  messagePayload: MailerQMessage;
+  messagePayload: Mail.Options;
 };
 
 export type MailerQConfig = {
@@ -23,12 +23,8 @@ export type MailerQRenderer = (
   locals: { [key: string]: any }
 ) => void;
 
-export type MailerQMessage = {
-  subject: string;
-  from?: string;
-  to?: string;
+export type MailerQMessage = Mail.Options & {
   templateFileName?: string;
   locals?: { [key: string]: any };
   htmlBody?: string;
-  attachments?: Mail.Attachment[];
 };
