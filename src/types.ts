@@ -9,7 +9,7 @@ export type MailerQMod = {
 };
 
 export type MailerQConfig = {
-  nodemailer: Mail.Options;
+  nodemailer: any;
   defaultFrom?: string;
   defaultTo?: string;
   renderer?: MailerQRenderer;

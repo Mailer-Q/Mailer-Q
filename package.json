@@ -6,7 +6,7 @@
     "url": "https://github.com/mailer-q/mailer-q"
   },
   "description": "A redis-backed mailer queue system",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc"
   },
