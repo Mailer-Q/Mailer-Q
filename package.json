@@ -3,8 +3,12 @@
   "version": "3.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mailer-q/mailer-q"
+    "url": "git+https://github.com/Mailer-Q/Mailer-Q.git"
   },
+  "bugs": {
+    "url": "https://github.com/Mailer-Q/Mailer-Q/issues"
+  },
+  "homepage": "https://github.com/Mailer-Q/Mailer-Q#readme",
   "description": "A redis-backed mailer queue system",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
