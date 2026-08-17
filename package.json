@@ -19,6 +19,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "REDIS_HOST=127.0.0.1 vitest run tests/queue.integration.test.ts",
     "lint": "eslint . --ext .ts",
     "prepublishOnly": "npm run build"
   },
