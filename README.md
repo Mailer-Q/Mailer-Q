@@ -1,6 +1,9 @@
 # MailerQ
 
-MailerQ is a Redis-backed mailer queue system, written in TypeScript.
+MailerQ is a small, Redis-backed mailer queue for Node.js, written in TypeScript. It wraps
+[Nodemailer](https://nodemailer.com/) for sending and [Bull](https://github.com/OptimalBits/bull)
+for queueing, so you can send mail immediately or enqueue it for a worker to deliver — with
+pluggable template renderers and typed configuration.
 
 ## Installation
 
@@ -10,8 +13,9 @@ npm install mailer-q --save
 
 ## Upgrading from v2
 
-**v3 is a breaking change.** MailerQ is now created with a factory that takes the
-config directly, instead of the `MailerQ().config(options)` chain:
+**v3 is a breaking change.** MailerQ is now created with a factory that takes the config
+directly, instead of the `MailerQ().config(options)` chain, and `deliverLater` is now a
+producer-only method paired with the new `processQueue()` consumer:
 
 ```javascript
 // v2
@@ -23,10 +27,7 @@ const MailerQ = require("mailer-q").default;
 module.exports = MailerQ(options);
 ```
 
-`deliverLater` is now a **producer only** — it enqueues a job and returns it. A worker
-process consumes the queue via the new `processQueue()` method (see below). `deliverNow`
-and `deliverLater` now resolve with the send `info` / Bull `Job` respectively, and
-`deliverLater`/`processQueue` throw if no `redis` config is present.
+See the [CHANGELOG](./CHANGELOG.md) for the full list of changes in each release.
 
 ## Usage
 
