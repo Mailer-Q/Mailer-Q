@@ -1,23 +1,40 @@
 {
   "name": "mailer-q",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/mailer-q/mailer-q"
   },
   "description": "A redis-backed mailer queue system",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
   "author": "Arun Sood",
   "license": "ISC",
   "dependencies": {
-    "bull": "^3.22.6",
-    "nodemailer": "^6.6.1"
+    "bull": "^4.16.3",
+    "nodemailer": "^9.0.5"
   },
   "devDependencies": {
-    "eslint": "^7.26.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.23.2",
-    "eslint-plugin-prettier": "^3.4.0",
-    "prettier": "^2.3.0"
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.16",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "ioredis-mock": "^8.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
   }
 }

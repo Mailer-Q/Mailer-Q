@@ -1,6 +1,6 @@
 # MailerQ
 
-MailerQ is a Redis-backed mailer queue system.
+MailerQ is a Redis-backed mailer queue system, written in TypeScript.
 
 ## Installation
 
@@ -8,30 +8,52 @@ MailerQ is a Redis-backed mailer queue system.
 npm install mailer-q --save
 ```
 
-## Usage
+## Upgrading from v2
 
-- It is easiest to have MailerQ's configuration in another module:
-
-config/mailers.js
+**v3 is a breaking change.** MailerQ is now created with a factory that takes the
+config directly, instead of the `MailerQ().config(options)` chain:
 
 ```javascript
+// v2
 const MailerQ = require("mailer-q")();
-
-const options = {
-  //Options here
-};
-
 module.exports = MailerQ.config(options);
+
+// v3
+const MailerQ = require("mailer-q").default;
+module.exports = MailerQ(options);
 ```
 
-#### Available Options for MailerQ Configuration
+`deliverLater` is now a **producer only** — it enqueues a job and returns it. A worker
+process consumes the queue via the new `processQueue()` method (see below). `deliverNow`
+and `deliverLater` now resolve with the send `info` / Bull `Job` respectively, and
+`deliverLater`/`processQueue` throw if no `redis` config is present.
+
+## Usage
+
+- It is easiest to keep MailerQ's configuration in its own module:
+
+`config/mailers.js`
+
+```javascript
+const MailerQ = require("mailer-q").default;
+// or, with ESM / TypeScript: import MailerQ from "mailer-q";
+
+const options = {
+  // Options here
+};
+
+module.exports = MailerQ(options);
+```
+
+### Available Options for MailerQ Configuration
 
 - **nodemailer**: Configuration object for Nodemailer. An example is shown below but all options can be found in the Nodemailer documentation here: https://nodemailer.com/smtp/.
-- **defaultFrom** (Optional): Set the default sender
-- **defaultTo** (Optional): Set the default recipient (not common)
-- **renderer** (Optional): Method to render email templates
-- **sendAttempts** (Optional): Number of times MailerQ will attempt to send your mail. Defaults to 3.
-- **redis** (Optional): Configuration options to configure Redis. These configuration options come from ioredis and you can find all options in their documentation here: https://github.com/luin/ioredis/blob/master/API.md.
+- **defaultFrom** (Optional): Set the default sender.
+- **defaultTo** (Optional): Set the default recipient (not common).
+- **renderer** (Optional): Method to render email templates.
+- **sendAttempts** (Optional): Number of times MailerQ will attempt to send queued mail. Defaults to 3.
+- **redis** (Optional): Redis connection options (from [ioredis](https://github.com/redis/ioredis)). Required for `deliverLater` and `processQueue`.
+- **queueName** (Optional): Name of the Bull queue. Defaults to `"MailerQ SendEmail Process"`.
 
 Example:
 
@@ -42,41 +64,45 @@ const config = {
     port: 587,
     auth: {
       user: "your username",
-      pass: "your pass"
-    }
+      pass: "your pass",
+    },
   },
-  defaultFrom: "Test Tester test@example.com",
+  defaultFrom: "Test Tester <test@example.com>",
   defaultTo: "recipient@test.com",
-  sendAttempts: 5
+  sendAttempts: 5,
+  redis: { host: "127.0.0.1", port: 6379 },
 };
 ```
 
-#### Optional Renderers
+### Optional Renderers
 
 - [EJS Renderer](https://github.com/mailer-q/mailer-q-ejs): Use the [EJS templating syntax](https://ejs.co/).
 - [Handlebars Renderer](https://github.com/mailer-q/mailer-q-handlebars): Use the [Handlebars templating syntax](http://handlebarsjs.com/).
 - [Pug Renderer](https://github.com/mailer-q/mailer-q-pug): Use the [Pug templating syntax](https://pugjs.org/api/getting-started.html).
 
-#### Sending Mail
+A renderer is any function `(templateFileName, locals) => htmlString`.
 
-- The module has two methods - `deliverNow` and `deliverLater`.
-- `deliverNow` will attempt to send the email message immediately, vs `deliverLater` will use Redis to queue this action up for a later time.
-- `deliverNow` and `deliverLater` must be chained with `contents`, which sets up the content to be sent.
+### Sending Mail
 
-Example:
+Build the message content with `contents()`, then chain either `deliverNow()` or
+`deliverLater()`:
+
+- `deliverNow()` sends immediately and resolves with Nodemailer's `info`.
+- `deliverLater()` enqueues the message and resolves with the Bull `Job`. A worker then
+  processes it (see [Processing the queue](#processing-the-queue)).
 
 ```javascript
 const MailerQ = require("./config/mailers");
 
 MailerQ.contents({
-  from: "Test Sender sender@test.com",
+  from: "Test Sender <sender@test.com>",
   to: "recipient@example.com",
   subject: "Test message",
-  htmlBody: "<h1>HTML message here!</h1>"
+  htmlBody: "<h1>HTML message here!</h1>",
 })
   .deliverNow()
-  .then(() => {
-    console.log("Message sent!");
+  .then((info) => {
+    console.log("Message sent!", info.messageId);
   })
   .catch((err) => {
     console.log(err);
@@ -85,10 +111,42 @@ MailerQ.contents({
 
 #### Available Options for `.contents()`
 
-- **subject**: Subject of message
-- **from** (Optional): Email address of sender. Optional only if not using defaultFrom in the initial configuration.
-- **to** (Optional): Email address of recipient. Optional only if not using defaultTo in the initial configuration.
-- **templateFileName** (Optional): Name of file used as template (only use this if you're using a renderer plugin)
-- **htmlBody** (Optional): HTML to send in email message
-- **locals** (Optional): Object of local variables to be used in renderer (only use this if you're using a renderer plugin)
-- **attachments** (Optional): Array of attachment objects as specified by Nodemailer: https://nodemailer.com/message/attachments/.
+- **subject**: Subject of the message (required).
+- **from** (Optional): Sender address. Optional only if `defaultFrom` is configured.
+- **to** (Optional): Recipient address. Optional only if `defaultTo` is configured.
+- **templateFileName** (Optional): Name of the template file (only with a renderer plugin).
+- **htmlBody** (Optional): HTML to send. Used when no `templateFileName` is provided.
+- **locals** (Optional): Variables passed to the renderer (only with a renderer plugin).
+- **attachments** (Optional): Array of attachment objects per Nodemailer: https://nodemailer.com/message/attachments/.
+
+### Processing the queue
+
+`deliverLater()` only enqueues. Run `processQueue()` **once in a worker process** to
+consume the queue and actually send the mail. It returns the underlying Bull queue so you
+can listen for events:
+
+```javascript
+const MailerQ = require("./config/mailers");
+
+const queue = MailerQ.processQueue();
+
+queue.on("completed", (job) => console.log("Sent:", job.id));
+queue.on("failed", (job, err) => console.error("Failed:", job.id, err));
+```
+
+### Shutting down
+
+Call `close()` to gracefully close the queue and transporter connections (e.g. on process
+shutdown):
+
+```javascript
+await MailerQ.close();
+```
+
+## Development
+
+```bash
+npm run build   # compile TypeScript to dist/
+npm test        # run the Vitest suite
+npm run lint    # eslint
+```
