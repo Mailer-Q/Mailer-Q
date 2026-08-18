@@ -1,6 +1,6 @@
 {
   "name": "mailer-q",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mailer-Q/Mailer-Q.git"
@@ -26,7 +26,8 @@
   "author": "Aaron Sood",
   "license": "MIT",
   "dependencies": {
-    "bull": "^4.16.3",
+    "bullmq": "^6.1.2",
+    "ioredis": "^6.0.0",
     "nodemailer": "^9.0.5"
   },
   "devDependencies": {

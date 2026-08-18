@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { Queue } from "bullmq";
 
 import MailerQ from "../src/index";
 import type { MailerQConfig } from "../src/types";
 
 /**
- * End-to-end queue test against a REAL Redis and REAL Bull (the unit tests in
+ * End-to-end queue test against a REAL Redis and REAL BullMQ (the unit tests in
  * queue.test.ts mock both). Nodemailer runs with `jsonTransport`, so no SMTP
  * server is needed — sends resolve locally with the message as JSON.
  *
@@ -25,29 +26,30 @@ const jsonTransport = {
   jsonTransport: true,
 } as unknown as MailerQConfig["nodemailer"];
 
-describeIntegration("MailerQ queue (integration: real Redis + Bull)", () => {
+describeIntegration("MailerQ queue (integration: real Redis + BullMQ)", () => {
   const redis = {
     host: redisHost ?? "127.0.0.1",
     port: Number(process.env.REDIS_PORT ?? 6379),
   };
 
   it("delivers a queued message end to end via deliverLater + processQueue", async () => {
+    // Unique queue name per run so leftover jobs can't bleed between runs.
+    const queueName = `mailer-q-itest-${Date.now()}`;
     const mailer = MailerQ({
       nodemailer: jsonTransport,
       redis,
-      // Unique queue name per run so leftover jobs can't bleed between runs.
-      queueName: `mailer-q-itest-${Date.now()}`,
+      queueName,
       sendAttempts: 1,
     });
 
-    const queue = mailer.processQueue();
+    const worker = mailer.processQueue();
 
     const completed = new Promise<{ jobId: string; result: SendInfo }>(
       (resolve, reject) => {
-        queue.on("completed", (job, result) =>
+        worker.on("completed", (job, result) =>
           resolve({ jobId: String(job.id), result: result as SendInfo }),
         );
-        queue.on("failed", (_job, err) => reject(err));
+        worker.on("failed", (_job, err) => reject(err));
       },
     );
 
@@ -70,12 +72,16 @@ describeIntegration("MailerQ queue (integration: real Redis + Bull)", () => {
     expect(message.subject).toBe("Integration test");
     expect(result.message).toContain("recipient@example.com");
 
-    await queue.obliterate({ force: true });
+    // Clean up the run's Redis keys (obliterate lives on the queue, not the
+    // worker) and close every connection.
+    const cleanup = new Queue(queueName, { connection: redis });
+    await cleanup.obliterate({ force: true });
+    await cleanup.close();
     await mailer.close();
   }, 20000);
 });
 
-// Minimal shape of nodemailer's jsonTransport SentMessageInfo, after Bull's
+// Minimal shape of nodemailer's jsonTransport SentMessageInfo, after BullMQ's
 // JSON round-trip through Redis.
 interface SendInfo {
   messageId: string;
