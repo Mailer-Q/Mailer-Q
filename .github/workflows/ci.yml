@@ -44,7 +44,7 @@ jobs:
       - name: Test
         run: yarn test
 
-      - name: Integration test (real Redis + Bull)
+      - name: Integration test (real Redis + BullMQ)
         run: yarn test:integration
         env:
           REDIS_HOST: localhost
