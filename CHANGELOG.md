@@ -4,13 +4,13 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.1] - 2026-08-18
+## [3.0.2] - 2026-08-18
 
 ### Changed
 
 - Relicensed from ISC to MIT, and added the `LICENSE` file to the published package. The
   `3.0.0` release on npm still declared ISC; this is a metadata-only release with no code
-  changes.
+  changes. (`3.0.1` was tagged but never published to npm, so this ships as `3.0.2`.)
 
 ## [3.0.0] - 2026-08-16
 
@@ -69,7 +69,7 @@ All notable changes to this project are documented here. The format is based on
 - Initial releases (1.0.0 – 1.1.0): the original Redis-backed mailer queue wrapping
   Nodemailer and Bull.
 
-[3.0.1]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v3.0.1
+[3.0.2]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v3.0.2
 [3.0.0]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v3.0.0
 [2.0.2]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v2.0.2
 [2.0.0]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v2.0.0
