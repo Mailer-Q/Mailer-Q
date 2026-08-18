@@ -84,9 +84,9 @@ const config = {
 
 ### Optional Renderers
 
-- [EJS Renderer](https://github.com/mailer-q/mailer-q-ejs): Use the [EJS templating syntax](https://ejs.co/).
-- [Handlebars Renderer](https://github.com/mailer-q/mailer-q-handlebars): Use the [Handlebars templating syntax](http://handlebarsjs.com/).
-- [Pug Renderer](https://github.com/mailer-q/mailer-q-pug): Use the [Pug templating syntax](https://pugjs.org/api/getting-started.html).
+- [EJS Renderer](https://github.com/Mailer-Q/Mailer-Q-EJS): Use the [EJS templating syntax](https://ejs.co/).
+- [Handlebars Renderer](https://github.com/Mailer-Q/Mailer-Q-Handlebars): Use the [Handlebars templating syntax](http://handlebarsjs.com/).
+- [Pug Renderer](https://github.com/Mailer-Q/Mailer-Q-Pug): Use the [Pug templating syntax](https://pugjs.org/api/getting-started.html).
 
 A renderer is any function `(templateFileName, locals) => htmlString`.
 
