@@ -143,5 +143,4 @@ npm run lint    # eslint
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md) for the notable changes in each release, including the
-v2 → v3 breaking changes and how to migrate.
+See [CHANGELOG.md](./CHANGELOG.md) for the notable changes in each release.
