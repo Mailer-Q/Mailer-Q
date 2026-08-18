@@ -1,5 +1,12 @@
 # MailerQ
 
+[![npm version](https://img.shields.io/npm/v/mailer-q.svg)](https://www.npmjs.com/package/mailer-q)
+[![npm downloads](https://img.shields.io/npm/dm/mailer-q.svg)](https://www.npmjs.com/package/mailer-q)
+[![CI](https://github.com/Mailer-Q/Mailer-Q/actions/workflows/ci.yml/badge.svg)](https://github.com/Mailer-Q/Mailer-Q/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-3178C6.svg)](https://www.typescriptlang.org/)
+[![node](https://img.shields.io/node/v/mailer-q.svg)](https://nodejs.org/)
+[![license](https://img.shields.io/npm/l/mailer-q.svg)](./LICENSE)
+
 MailerQ is a small, Redis-backed mailer queue for Node.js, written in TypeScript. It wraps
 [Nodemailer](https://nodemailer.com/) for sending and [Bull](https://github.com/OptimalBits/bull)
 for queueing, so you can send mail immediately or enqueue it for a worker to deliver — with
