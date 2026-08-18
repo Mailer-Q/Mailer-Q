@@ -18,24 +18,6 @@ pluggable template renderers and typed configuration.
 npm install mailer-q --save
 ```
 
-## Upgrading from v2
-
-**v3 is a breaking change.** MailerQ is now created with a factory that takes the config
-directly, instead of the `MailerQ().config(options)` chain, and `deliverLater` is now a
-producer-only method paired with the new `processQueue()` consumer:
-
-```javascript
-// v2
-const MailerQ = require("mailer-q")();
-module.exports = MailerQ.config(options);
-
-// v3
-const MailerQ = require("mailer-q").default;
-module.exports = MailerQ(options);
-```
-
-See the [CHANGELOG](./CHANGELOG.md) for the full list of changes in each release.
-
 ## Usage
 
 - It is easiest to keep MailerQ's configuration in its own module:
@@ -158,3 +140,8 @@ npm run build   # compile TypeScript to dist/
 npm test        # run the Vitest suite
 npm run lint    # eslint
 ```
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for the notable changes in each release, including the
+v2 → v3 breaking changes and how to migrate.
