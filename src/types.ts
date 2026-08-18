@@ -1,5 +1,4 @@
-import type { Job, JobOptions, Queue } from "bull";
-import type { RedisOptions } from "ioredis";
+import type { ConnectionOptions, Job, JobsOptions, Worker } from "bullmq";
 import type { SentMessageInfo, Transporter } from "nodemailer";
 import type Mail from "nodemailer/lib/mailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
@@ -27,9 +26,10 @@ export interface MailerQConfig {
   renderer?: MailerQRenderer;
   /** Retry attempts for queued sends. Defaults to DEFAULT_SEND_ATTEMPTS. */
   sendAttempts?: number;
-  /** Redis connection options. Required for `deliverLater` / `processQueue`. */
-  redis?: RedisOptions;
-  /** Bull queue name. Defaults to DEFAULT_QUEUE_NAME. */
+  /** Redis connection options (BullMQ `ConnectionOptions`; an ioredis instance
+   * is also accepted). Required for `deliverLater` / `processQueue`. */
+  redis?: ConnectionOptions;
+  /** BullMQ queue name. Defaults to DEFAULT_QUEUE_NAME. */
   queueName?: string;
 }
 
@@ -53,8 +53,8 @@ export interface Envelope {
   readonly payload: Mail.Options;
   /** Send immediately; resolves with Nodemailer's send info. */
   deliverNow: () => Promise<SentMessageInfo>;
-  /** Enqueue for a worker to process later; resolves with the Bull job. */
-  deliverLater: (options?: JobOptions) => Promise<Job<Mail.Options>>;
+  /** Enqueue for a worker to process later; resolves with the BullMQ job. */
+  deliverLater: (options?: JobsOptions) => Promise<Job<Mail.Options>>;
 }
 
 export interface MailerQInstance {
@@ -62,10 +62,10 @@ export interface MailerQInstance {
   contents: (message: MailerQMessage) => Envelope;
   /**
    * Start processing queued messages. Run once in a worker process; returns the
-   * underlying Bull queue so callers can attach `completed`/`failed` listeners.
+   * BullMQ worker so callers can attach `completed`/`failed` listeners.
    */
-  processQueue: () => Queue<Mail.Options>;
-  /** Gracefully close the queue and transporter connections. */
+  processQueue: () => Worker<Mail.Options>;
+  /** Gracefully close the queue, worker, and transporter connections. */
   close: () => Promise<void>;
 }
 

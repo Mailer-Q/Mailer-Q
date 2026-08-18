@@ -8,7 +8,7 @@
 [![license](https://img.shields.io/npm/l/mailer-q.svg)](./LICENSE)
 
 MailerQ is a small, Redis-backed mailer queue for Node.js, written in TypeScript. It wraps
-[Nodemailer](https://nodemailer.com/) for sending and [Bull](https://github.com/OptimalBits/bull)
+[Nodemailer](https://nodemailer.com/) for sending and [BullMQ](https://github.com/taskforcesh/bullmq)
 for queueing, so you can send mail immediately or enqueue it for a worker to deliver — with
 pluggable template renderers and typed configuration.
 
@@ -42,8 +42,8 @@ module.exports = MailerQ(options);
 - **defaultTo** (Optional): Set the default recipient (not common).
 - **renderer** (Optional): Method to render email templates.
 - **sendAttempts** (Optional): Number of times MailerQ will attempt to send queued mail. Defaults to 3.
-- **redis** (Optional): Redis connection options (from [ioredis](https://github.com/redis/ioredis)). Required for `deliverLater` and `processQueue`.
-- **queueName** (Optional): Name of the Bull queue. Defaults to `"MailerQ SendEmail Process"`.
+- **redis** (Optional): Redis connection options (BullMQ's `ConnectionOptions` — an [ioredis](https://github.com/redis/ioredis) options object or instance). Requires Redis 5.0+ (6.2+ recommended). Required for `deliverLater` and `processQueue`.
+- **queueName** (Optional): Name of the BullMQ queue. Defaults to `"MailerQ SendEmail Process"`.
 
 Example:
 
@@ -78,7 +78,7 @@ Build the message content with `contents()`, then chain either `deliverNow()` or
 `deliverLater()`:
 
 - `deliverNow()` sends immediately and resolves with Nodemailer's `info`.
-- `deliverLater()` enqueues the message and resolves with the Bull `Job`. A worker then
+- `deliverLater()` enqueues the message and resolves with the BullMQ `Job`. A worker then
   processes it (see [Processing the queue](#processing-the-queue)).
 
 ```javascript
@@ -112,16 +112,16 @@ MailerQ.contents({
 ### Processing the queue
 
 `deliverLater()` only enqueues. Run `processQueue()` **once in a worker process** to
-consume the queue and actually send the mail. It returns the underlying Bull queue so you
-can listen for events:
+consume the queue and actually send the mail. It returns the underlying BullMQ
+[`Worker`](https://docs.bullmq.io/guide/workers) so you can listen for events:
 
 ```javascript
 const MailerQ = require("./config/mailers");
 
-const queue = MailerQ.processQueue();
+const worker = MailerQ.processQueue();
 
-queue.on("completed", (job) => console.log("Sent:", job.id));
-queue.on("failed", (job, err) => console.error("Failed:", job.id, err));
+worker.on("completed", (job) => console.log("Sent:", job.id));
+worker.on("failed", (job, err) => console.error("Failed:", job.id, err));
 ```
 
 ### Shutting down

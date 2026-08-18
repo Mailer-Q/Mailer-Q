@@ -1,23 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  QueueMock,
-  add,
-  process: processFn,
-  queueClose,
-} = vi.hoisted(() => {
-  const add = vi.fn(async () => ({ id: "job-1" }));
-  const processFn = vi.fn();
-  const queueClose = vi.fn(async () => undefined);
-  const QueueMock = vi.fn(() => ({
-    add,
-    process: processFn,
-    close: queueClose,
-  }));
-  return { QueueMock, add, process: processFn, queueClose };
-});
+const { QueueMock, WorkerMock, add, queueClose, workerClose } = vi.hoisted(
+  () => {
+    const add = vi.fn(async () => ({ id: "job-1" }));
+    const queueClose = vi.fn(async () => undefined);
+    const workerClose = vi.fn(async () => undefined);
+    const QueueMock = vi.fn(() => ({ add, close: queueClose }));
+    const WorkerMock = vi.fn(() => ({ close: workerClose }));
+    return { QueueMock, WorkerMock, add, queueClose, workerClose };
+  },
+);
 
-vi.mock("bull", () => ({ default: QueueMock }));
+vi.mock("bullmq", () => ({ Queue: QueueMock, Worker: WorkerMock }));
 vi.mock("nodemailer", () => ({
   default: {
     createTransport: vi.fn(() => ({ sendMail: vi.fn(), close: vi.fn() })),
@@ -25,7 +19,7 @@ vi.mock("nodemailer", () => ({
 }));
 
 import MailerQ from "../src/index";
-import { DEFAULT_QUEUE_NAME } from "../src/constants";
+import { DEFAULT_QUEUE_NAME, JOB_NAME } from "../src/constants";
 
 const redis = { host: "127.0.0.1", port: 6379 };
 
@@ -41,7 +35,8 @@ describe("deliverLater", () => {
       .deliverLater();
 
     expect(add).toHaveBeenCalledTimes(1);
-    const [payload, options] = add.mock.calls[0];
+    const [name, payload, options] = add.mock.calls[0];
+    expect(name).toBe(JOB_NAME);
     expect(payload).toMatchObject({ to: "to@example.com", subject: "Hi" });
     expect(options).toMatchObject({ attempts: 3 });
     expect(job).toEqual({ id: "job-1" });
@@ -58,8 +53,10 @@ describe("deliverLater", () => {
       .contents({ to: "to@example.com", subject: "Hi" })
       .deliverLater();
 
-    expect(QueueMock).toHaveBeenCalledWith("custom-queue", { redis });
-    expect(add.mock.calls[0][1]).toMatchObject({ attempts: 7 });
+    expect(QueueMock).toHaveBeenCalledWith("custom-queue", {
+      connection: redis,
+    });
+    expect(add.mock.calls[0][2]).toMatchObject({ attempts: 7 });
   });
 
   it("uses the default queue name when none is configured", async () => {
@@ -68,7 +65,9 @@ describe("deliverLater", () => {
       .contents({ to: "to@example.com", subject: "Hi" })
       .deliverLater();
 
-    expect(QueueMock).toHaveBeenCalledWith(DEFAULT_QUEUE_NAME, { redis });
+    expect(QueueMock).toHaveBeenCalledWith(DEFAULT_QUEUE_NAME, {
+      connection: redis,
+    });
   });
 
   it("reuses a single queue instance across enqueues", async () => {
@@ -89,17 +88,31 @@ describe("deliverLater", () => {
 });
 
 describe("processQueue", () => {
-  it("registers a processor exactly once and returns the queue", () => {
+  it("starts a worker exactly once and returns it", () => {
     const mailer = MailerQ({ nodemailer: {}, redis });
-    const queue = mailer.processQueue();
+    const worker = mailer.processQueue();
 
-    expect(processFn).toHaveBeenCalledTimes(1);
-    expect(queue).toBeDefined();
+    expect(WorkerMock).toHaveBeenCalledTimes(1);
+    // (queueName, processor, { connection })
+    const [name, processor, options] = WorkerMock.mock.calls[0];
+    expect(name).toBe(DEFAULT_QUEUE_NAME);
+    expect(typeof processor).toBe("function");
+    expect(options).toMatchObject({ connection: redis });
+    expect(worker).toBeDefined();
+  });
+
+  it("reuses a single worker across calls", () => {
+    const mailer = MailerQ({ nodemailer: {}, redis });
+    mailer.processQueue();
+    mailer.processQueue();
+
+    expect(WorkerMock).toHaveBeenCalledTimes(1);
   });
 
   it("throws when no redis config is provided", () => {
     const mailer = MailerQ({ nodemailer: {} });
     expect(() => mailer.processQueue()).toThrow(/require a Redis config/);
+    expect(WorkerMock).not.toHaveBeenCalled();
   });
 });
 
@@ -112,9 +125,18 @@ describe("close", () => {
     expect(queueClose).toHaveBeenCalledTimes(1);
   });
 
+  it("closes the worker when one was created", async () => {
+    const mailer = MailerQ({ nodemailer: {}, redis });
+    mailer.processQueue();
+    await mailer.close();
+
+    expect(workerClose).toHaveBeenCalledTimes(1);
+  });
+
   it("is a no-op when nothing was ever created", async () => {
     const mailer = MailerQ({ nodemailer: {}, redis });
     await expect(mailer.close()).resolves.toBeUndefined();
     expect(queueClose).not.toHaveBeenCalled();
+    expect(workerClose).not.toHaveBeenCalled();
   });
 });

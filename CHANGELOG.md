@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-08-18
+
+### Changed
+
+- **BREAKING:** Migrated the queue backend from Bull to
+  [BullMQ](https://github.com/taskforcesh/bullmq) (Bull is in maintenance mode).
+  `processQueue()` now returns a BullMQ **`Worker`** instead of a Bull `Queue`. The event
+  API is the same shape — attach `worker.on("completed", …)` / `worker.on("failed", …)` —
+  but any code that called `Queue`-only methods (e.g. `obliterate()`, `getJobCounts()`) on
+  the return value must be updated.
+- **BREAKING:** Requires **Redis 5.0+** (6.2+ recommended), per BullMQ.
+- `config.redis` now accepts BullMQ's `ConnectionOptions` (an ioredis options object or
+  instance). Passing `{ host, port, … }` is unchanged.
+- Replaced the `bull` dependency with `bullmq`, and added `ioredis` as a direct dependency
+  (BullMQ 6 makes it an optional peer, whereas Bull bundled it).
+
+### Notes
+
+- `contents()`, `deliverNow()`, and `deliverLater()` semantics are unchanged, as is the
+  message/config shape apart from the widened `redis` type. Internally, queued jobs are now
+  added under a fixed BullMQ job name.
+
 ## [3.0.2] - 2026-08-18
 
 ### Changed
@@ -69,6 +91,7 @@ All notable changes to this project are documented here. The format is based on
 - Initial releases (1.0.0 – 1.1.0): the original Redis-backed mailer queue wrapping
   Nodemailer and Bull.
 
+[4.0.0]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v4.0.0
 [3.0.2]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v3.0.2
 [3.0.0]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v3.0.0
 [2.0.2]: https://github.com/Mailer-Q/Mailer-Q/releases/tag/v2.0.2
