@@ -5,8 +5,12 @@ const { QueueMock, WorkerMock, add, queueClose, workerClose } = vi.hoisted(
     const add = vi.fn(async () => ({ id: "job-1" }));
     const queueClose = vi.fn(async () => undefined);
     const workerClose = vi.fn(async () => undefined);
-    const QueueMock = vi.fn(() => ({ add, close: queueClose }));
-    const WorkerMock = vi.fn(() => ({ close: workerClose }));
+    const QueueMock = vi.fn(function () {
+      return { add, close: queueClose };
+    });
+    const WorkerMock = vi.fn(function () {
+      return { close: workerClose };
+    });
     return { QueueMock, WorkerMock, add, queueClose, workerClose };
   },
 );
